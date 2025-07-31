@@ -44,6 +44,10 @@ io.on("connection", (socket) => {
       });
     }
   });
+  // Listen for "typing" event
+  socket.on("typing", ({ senderId, receiverId }) => {
+    io.to(receiverId).emit("typing", { senderId });
+  });
   socket.on("disconnect", () => {
     for (const userId in users) {
       if (users[userId] === socket.id) {
