@@ -36,17 +36,22 @@ io.on("connection", (socket) => {
   // Listen for "send-message" event
   socket.on("send-message", ({ senderId, receiverId, message }) => {
     console.log(`Message from ${senderId} to ${receiverId}: ${message}`);
+    const timeStamp = new Date().toISOString();
     const receiverSocketId = users[receiverId];
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("receive-message", {
         senderId,
         message,
+        timeStamp,
       });
     }
   });
   // Listen for "typing" event
   socket.on("typing", ({ senderId, receiverId }) => {
-    io.to(receiverId).emit("typing", { senderId });
+    const receiverSocketId = users[receiverId];
+    if (receiverSocketId) {
+      io.to(receiverId).emit("typing", { senderId });
+    }
   });
   socket.on("disconnect", () => {
     for (const userId in users) {
