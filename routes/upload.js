@@ -7,10 +7,12 @@ const router = express.Router();
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "chat_uploads",
-    resource_type: "auto",
-    allowed_formats: ["jpg", "png", "mp4", "pdf", "jpeg"],
+  params: async (req, res) => {
+    return {
+      folder: "chat_uploads",
+      resource_type: "auto",
+      format: file.mimetype.split("/")[1],
+    };
   },
 });
 
