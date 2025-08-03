@@ -9,6 +9,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "chat_uploads",
+    resource_type: "auto",
     allowed_formats: ["jpg", "png", "mp4", "pdf", "jpeg"],
   },
 });
