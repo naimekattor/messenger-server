@@ -46,24 +46,29 @@ io.on("connection", (socket) => {
   });
 
   // Listen for "send-message" event
-  socket.on("send-message", ({ senderId, receiverId, message, fileUrl }) => {
-    console.log(`📨 Message from ${senderId} to ${receiverId}: ${message}`);
-    const timeStamp = new Date().toISOString();
-    const receiverSocketId = users[receiverId];
+  socket.on(
+    "send-message",
+    ({ senderId, receiverId, message, messageType, fileUrl, fileName }) => {
+      console.log(`📨 Message from ${senderId} to ${receiverId}: ${message}`);
+      const timeStamp = new Date().toISOString();
+      const receiverSocketId = users[receiverId];
 
-    if (receiverSocketId) {
-      console.log(`✅ Delivering message to socket: ${receiverSocketId}`);
-      io.to(receiverSocketId).emit("receive-message", {
-        senderId,
-        message,
-        fileUrl,
-        timeStamp,
-      });
-    } else {
-      console.log(`❌ Receiver ${receiverId} not found in users list`);
-      console.log(`📋 Available users: ${Object.keys(users).join(", ")}`);
+      if (receiverSocketId) {
+        console.log(`✅ Delivering message to socket: ${receiverSocketId}`);
+        io.to(receiverSocketId).emit("receive-message", {
+          senderId,
+          message,
+          messageType,
+          fileUrl,
+          fileName,
+          timeStamp,
+        });
+      } else {
+        console.log(`❌ Receiver ${receiverId} not found in users list`);
+        console.log(`📋 Available users: ${Object.keys(users).join(", ")}`);
+      }
     }
-  });
+  );
 
   // Listen for "typing" event
   socket.on("typing", ({ senderId, receiverId }) => {
