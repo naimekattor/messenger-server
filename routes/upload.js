@@ -21,7 +21,12 @@ const parser = multer({ storage });
 router.post("/", parser.single("file"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-  res.json({ url: req.file.path, public_id: req.file.filename });
+  res.json({
+    url: req.file.path,
+    public_id: req.file.filename,
+    fileType: req.file.mimetype,
+    fileName: req.file.originalname,
+  });
 });
 
 module.exports = router;

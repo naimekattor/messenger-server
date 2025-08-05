@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const authRoutes = require("./routes/auth");
 const User = require("./models/User");
 const uploadRoute = require("./routes/upload");
+const Message = require("./models/Message");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -48,8 +49,27 @@ io.on("connection", (socket) => {
   // Listen for "send-message" event
   socket.on(
     "send-message",
-    ({ senderId, receiverId, message, messageType, fileUrl, fileName }) => {
+    ({
+      senderId,
+      receiverId,
+      message,
+      messageType,
+      fileUrl,
+      fileName,
+      fileType,
+    }) => {
       console.log(`📨 Message from ${senderId} to ${receiverId}: ${message}`);
+
+      const newMessage = new Message({
+        senderId,
+        receiverId,
+        text: messageType === "text" ? message : undefined,
+        type: messageType,
+        fileUrl,
+        fileType,
+        fileName,
+      });
+      newMessage.save();
       const timeStamp = new Date().toISOString();
       const receiverSocketId = users[receiverId];
 
@@ -60,6 +80,7 @@ io.on("connection", (socket) => {
           message,
           messageType,
           fileUrl,
+          fileType,
           fileName,
           timeStamp,
         });
@@ -153,6 +174,17 @@ app.get("/users/:id", async (req, res) => {
     console.error("❌ Error fetching users:", error);
     res.status(500).json({ error: "Failed to fetch users" });
   }
+});
+app.get("/messages/:user1/:user2", async (req, res) => {
+  const { user1, user2 } = req.params;
+  const messages = await Message.find({
+    $or: [
+      { senderId: user1, receiverId: user2 },
+      { senderId: user2, receiverId: user1 },
+    ],
+  }).sort({ createdAt: 1 }); // sort by oldest first
+
+  res.json(messages);
 });
 
 // Start server
